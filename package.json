@@ -1,0 +1,47 @@
+{
+  "name": "dataguard-api",
+  "version": "0.0.2",
+  "description": ".",
+  "main": "index.js",
+  "scripts": {
+    "prestart": "npm install",
+    "test": "./node_modules/.bin/mocha --reporter spec",
+    "start": "cross-env NODE_ENV=development node index.js",
+    "dev": "cross-env NODE_ENV=development ./node_modules/.bin/nodemon index.js",
+    "prod": "NODE_ENV=production node index.js",
+    "lint": "eslint .",
+    "precommit": "npm run lint"
+  },
+  "keywords": [
+    "swagger"
+  ],
+  "license": "MIT",
+  "private": true,
+  "dependencies": {
+    "connect": "^3.2.0",
+    "cron": "1.3.0",
+    "express": "4.16.2",
+    "fast-glob": "2.1.0",
+    "ftp": "0.3.10",
+    "js-yaml": "^3.3.0",
+    "jsonwebtoken": "8.2.0",
+    "moment": "2.21.0",
+    "q": "1.5.1",
+    "shelljs": "0.8.1",
+    "swagger-tools": "0.10.1",
+    "winston": "2.4.0"
+  },
+  "devDependencies": {
+    "chai": "4.1.1",
+    "chai-http": "3.0.0",
+    "cross-env": "5.0.5",
+    "eslint": "4.17.0",
+    "eslint-config-airbnb": "16.1.0",
+    "eslint-plugin-import": "2.8.0",
+    "eslint-plugin-jsx-a11y": "6.0.3",
+    "eslint-plugin-react": "7.6.1",
+    "husky": "0.14.3",
+    "mocha": "3.5.0",
+    "nodemon": "1.12.0"
+  }
+}

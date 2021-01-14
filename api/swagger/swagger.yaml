@@ -1,0 +1,778 @@
+---
+swagger: "2.0"
+info:
+  description: "."
+  version: "1.0.0"
+  title: "MongoLeafDataGuard API"
+host: "localhost:3001"
+basePath: "/dataguard/v1"
+schemes:
+- "http"
+- "https"
+consumes:
+- "application/json"
+produces:
+- "application/json"
+paths:
+  /databases:
+    get:
+      tags:
+      - "Databases"
+      summary: "Retrieve mongodbs running on server"
+      operationId: "getDatabases"
+      parameters: []
+      responses:
+        200:
+          description: "OK"
+          schema:
+            $ref: "#/definitions/Dataresponse"
+        404:
+          description: "No databases found"
+          schema:
+            $ref: "#/definitions/Error"
+        500:
+          description: "Internal error"
+      x-swagger-router-controller: "Databases"
+    x-swagger-router-controller: "Databases"
+  /backups:
+    get:
+      tags:
+      - "Backups"
+      summary: "Get all backups"
+      operationId: "getBackups"
+      parameters:
+      - in: "query"
+        name: "backup_jobs" 
+        description: "?backup_jobs=true"
+        required: false
+        type: "boolean"
+        default: false
+      - in: "query"
+        name: "limit"
+        type: "number"
+        required: false
+        description: "Limit results (?limit=5&page=1)"
+      - in: "query"
+        name: "page"
+        type: "number"
+        required: false
+        description: "Limit results (?limit=5&page=1)"
+      responses:
+        200:
+          description: "OK"
+          schema:
+            $ref: "#/definitions/Dataresponse"
+        404:
+          description: "No backups found"
+          schema:
+            $ref: "#/definitions/Error"
+        500:
+          description: "Internal error"
+      x-swagger-router-controller: "Backups"
+    post:
+      tags:
+      - "Backups"
+      summary: "Define backup process"
+      operationId: "scheduleBackup"
+      parameters:
+      - in: "body"
+        name: "backup"
+        description: "backup settings"
+        required: true
+        schema:
+          $ref: "#/definitions/backup"
+      responses:
+        201:
+          description: "OK"
+        500:
+          description: "Internal error"
+      x-swagger-router-controller: "Backups"
+    delete:
+      tags:
+      - "Backups"
+      summary: "Deletes old backups"
+      operationId: "deleteBackupJobs"
+      parameters:
+      - name: "job_descriptor"
+        in: "query"
+        description: "?job_descriptor"
+        required: false
+        type: "string"
+      responses:
+        200:
+          description: "Deleted jobs"
+          schema:
+            type: "object"
+            properties: {}
+        404:
+          description: "Job not found"
+          schema:
+            $ref: "#/definitions/Error"
+        500:
+          description: "Internal error"
+      x-swagger-router-controller: "Backups"
+    x-swagger-router-controller: "Backups"
+  /backups/{db}:
+    get:
+      tags:
+      - "Backups"
+      summary: "Get backups for selected db"
+      operationId: "getBackupsFromDatabase"
+      parameters:
+      - name: "db"
+        in: "path"
+        required: true
+        type: "string"
+      - in: "query"
+        name: "limit"
+        type: "number"
+        required: false
+        description: "Limit results (?limit=5&page=1)"
+      - in: "query"
+        name: "page"
+        type: "number"
+        required: false
+        description: "Limit results (?limit=5&page=1)"
+      responses:
+        200:
+          description: "OK"
+          schema:
+            $ref: "#/definitions/Dataresponse"
+        404:
+          description: "No backups found for database"
+          schema:
+            $ref: "#/definitions/Error"
+        500:
+          description: "Internal error"
+      x-swagger-router-controller: "Backups"
+    x-swagger-router-controller: "Backups"
+  /backups/{db}/ftps:
+    get:
+      tags:
+      - "Backups"
+      summary: "Get backups for databases on ftp server"
+      operationId: "getDbBackupsFromFtp"
+      parameters:
+      - name: "db"
+        in: "path"
+        required: true
+        type: "string"
+      - name: "ftp_data"
+        in: "query"
+        description: "?ftp_data={host,port,username,password} < connection info for ftp >"
+        required: true
+        type: "string"
+      - name: "ftp_base_path"
+        in: "query"
+        description: "&ftp_base_path=/basePath < ftp base path >"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "OK"
+          schema:
+            $ref: "#/definitions/Dataresponse"
+        404:
+          description: "Noch backups found"
+          schema:
+            $ref: "#/definitions/Error"
+        500:
+          description: "Internal error"
+      x-swagger-router-controller: "Backups"
+  /backups/logs:
+    get:
+      tags:
+      - "Backups"
+      summary: "Retrieve Logs"
+      operationId: "getDatabaseLogs"
+      parameters:
+      - name: "db_descriptor"
+        in: "query"
+        description: "?db_descriptor=dummyDB"
+        required: false
+        type: "string"
+      - in: "query"
+        name: "limit"
+        type: "number"
+        required: false
+        description: "Limit results (?limit=5&)"
+      - in: "query"
+        name: "offset"
+        type: "number"
+        required: false
+        description: "Limit results (?limit=5&offset=5)"
+      responses:
+        200:
+          description: "Backup logs"
+          schema:
+            $ref: "#/definitions/Logs"
+        404:
+          description: "No logs found"
+          schema:
+            $ref: "#/definitions/Error"
+        500:
+          description: "Internal error"
+      x-swagger-router-controller: "Backups"
+    x-swagger-router-controller: "Backups"
+  /recoveries:
+    post:
+      tags:
+      - "Recoveries"
+      summary: "Start recovery process"
+      operationId: "runRecovery"
+      parameters:
+      - in: "body"
+        name: "recovery"
+        description: "Data for recovery"
+        required: true
+        schema:
+          $ref: "#/definitions/recovery"
+      responses:
+        201:
+          description: "Recovery successful"
+          schema:
+            $ref: "#/definitions/Dataresponse"
+        500:
+          description: "Internal error"
+      x-swagger-router-controller: "Recoveries"
+    x-swagger-router-controller: "Recoveries"
+  /recoveries/logs:
+    get:
+      tags:
+      - "Recoveries"
+      summary: "Retrieve Logs"
+      operationId: "getRecoveryLogs"
+      parameters:
+      - name: "db_descriptor"
+        in: "query"
+        description: "?db_descriptor=dummyDB"
+        required: false
+        type: "string"
+      - in: "query"
+        name: "limit"
+        type: "number"
+        required: false
+        description: "Limit results (?limit=5&)"
+      - in: "query"
+        name: "offset"
+        type: "number"
+        required: false
+        description: "Limit results (?limit=5&offset=5)"
+      responses:
+        200:
+          description: "Log entires"
+          schema:
+            $ref: "#/definitions/Logs"
+        404:
+          description: "No logs found"
+          schema:
+            $ref: "#/definitions/Error"
+        500:
+          description: "Internal error"
+      x-swagger-router-controller: "Recoveries"
+    x-swagger-router-controller: "Recoveries"
+  /schedules:
+    get:
+      tags:
+      - "Schedules"
+      summary: "Retrieve schedules"
+      operationId: "getSchedules"
+      parameters:
+      - name: "schedule_descriptor"
+        in: "query"
+        description: "?schedule_descriptor=test"
+        required: false
+        type: "string"
+      - in: "query"
+        name: "limit"
+        type: "number"
+        required: false
+        description: "Limit results (?limit=5&page=1)"
+      - in: "query"
+        name: "page"
+        type: "number"
+        required: false
+        description: "Limit results (?limit=5&page=1)"
+      responses:
+        200:
+          description: "OK"
+        404:
+          description: "Schedule not found"
+          schema:
+            $ref: "#/definitions/Error"
+        500:
+          description: "Internal error"
+      x-swagger-router-controller: "Schedules"
+    post:
+      tags:
+      - "Schedules"
+      summary: "Create a new Schedule"
+      operationId: "createSchedule"
+      parameters:
+      - in: "body"
+        name: "schedule"
+        description: "Creates a new schedule"
+        required: true
+        schema:
+          $ref: "#/definitions/Schedule"
+      responses:
+        200:
+          description: "Created Schedule"
+        500:
+          description: "Internal error"
+      x-swagger-router-controller: "Schedules"
+    put:
+      tags:
+      - "Schedules"
+      summary: "Update schedule"
+      operationId: "updateSchedule"
+      parameters:
+      - in: "body"
+        name: "schedule"
+        description: "Updates schedule settings"
+        required: true
+        schema:
+          $ref: "#/definitions/Schedule"
+      responses:
+        200:
+          description: "Updated"
+        500:
+          description: "Internal error"
+      x-swagger-router-controller: "Schedules"
+    delete:
+      tags:
+      - "Schedules"
+      summary: "Delete schedule"
+      operationId: "deleteSchedule"
+      parameters:
+      - name: "schedule_descriptor"
+        in: "query"
+        description: "?schedule_descriptor=test"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "Schedule deleted"
+          schema:
+            type: "object"
+            properties: {}
+        404:
+          description: "Schedule not found"
+          schema:
+            $ref: "#/definitions/Error"
+        500:
+          description: "Internal error"
+      x-swagger-router-controller: "Schedules"
+    x-swagger-router-controller: "Schedules"
+  /schedules/{schedule_label}:
+    x-swagger-router-controller: "Schedules"
+    get:
+      tags:
+      - "Schedules"
+      summary: "Retrieve schedules by label"
+      operationId: "getSchedulesByLabel"
+      parameters:
+      - name: "schedule_label"
+        in: "path"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "OK"
+          schema:
+            $ref: "#/definitions/Dataresponse"
+        404:
+          description: "Not found"
+          schema:
+            $ref: "#/definitions/Error"
+        500:
+          description: "Internal error"
+  
+  /commands:
+    get:
+      tags:
+      - "Commands"
+      summary: "Retriev used MongoDB commands"
+      operationId: "getMongoDbCommands"
+      parameters:
+      - name: "command_descriptor"
+        in: "query"
+        description: "?command_descriptor=123"
+        required: false
+        type: "string"
+      - in: "query"
+        name: "limit"
+        type: "number"
+        required: false
+        description: "Limit results (?limit=5&page=1)"
+      - in: "query"
+        name: "page"
+        type: "number"
+        required: false
+        description: "Limit results (?limit=5&page=1)"
+      responses:
+        200:
+          description: "OK"
+          schema:
+            $ref: "#/definitions/Dataresponse"
+        404:
+          description: "Command not found"
+          schema:
+            $ref: "#/definitions/Error"
+        500:
+          description: "Internal error"
+      x-swagger-router-controller: "Commands"
+    put:
+      tags:
+      - "Commands"
+      summary: "Update a MongoDB command"
+      operationId: "updateMongoDbCommand"
+      parameters:
+      - name: "command"
+        in: "body"
+        required: true
+        schema:
+          type: "object"
+          required:
+          - "descriptor"
+          properties:
+            descriptor:
+              type: "string"
+            parameters:
+              type: "object"
+              properties: {}
+      responses:
+        200:
+          description: "OK"
+        404:
+          description: "Command not found"
+          schema:
+            $ref: "#/definitions/Error"
+        500:
+          description: "Internal error"
+      x-swagger-router-controller: "Commands"
+    post:
+      tags:
+      - "Commands"
+      summary: "Creates a MongoDB command"
+      operationId: "createMongoDbCommand"
+      parameters:
+      - in: "body"
+        name: "command"
+        description: "Create new command with parameters"
+        required: true
+        schema:
+          $ref: "#/definitions/Command"
+      responses:
+        200:
+          description: "OK"
+        500:
+          description: "Internal error"
+      x-swagger-router-controller: "Commands"
+    delete:
+      tags:
+      - "Commands"
+      summary: "Delete command config"
+      operationId: "deleteCommandConfig"
+      parameters:
+      - name: "command_descriptor"
+        in: "query"
+        description: "?command_descriptor=123"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "Deleted config"
+          schema:
+            $ref: "#/definitions/Dataresponse"
+        404:
+          description: "Command not found"
+          schema:
+            $ref: "#/definitions/Error"
+        500:
+          description: "Internal error"
+      x-swagger-router-controller: "Commands"
+    x-swagger-router-controller: "Commands"
+  /commands/{type}:
+    get:
+      tags:
+      - "Commands"
+      summary: "Retrieve comands filtered by type" 
+      operationId: "getMongoDbCommandsByType"
+      parameters:
+      - name: "type"
+        in: "path"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "OK"
+          schema:
+            $ref: "#/definitions/Dataresponse"
+        404:
+          description: "Type not found"
+          schema:
+            $ref: "#/definitions/Error"
+        500:
+          description: "Internal error"
+      x-swagger-router-controller: "Commands"
+  /users:
+    get:
+      tags:
+      - "Users"
+      summary: "Get users"
+      operationId: "getUsers"
+      parameters:
+      - name: "user_id"
+        in: "query"
+        description: "?user_id="
+        required: false
+        type: "string"
+      - in: "query"
+        name: "limit"
+        type: "number"
+        required: false
+        description: "Limit results (?limit=5&page=1)"
+      - in: "query"
+        name: "page"
+        type: "number"
+        required: false
+        description: "Limit results (?limit=5&page=1)"
+      responses:
+        200:
+          description: "Users"
+          schema:
+            $ref: "#/definitions/Dataresponse"
+        404:
+          description: "No users found"
+          schema:
+            $ref: "#/definitions/Error"
+        500:
+          description: "Internal error"
+      x-swagger-router-controller: "Users"
+    post:
+      tags:
+      - "Users"
+      summary: "Create new user"
+      operationId: "createUser"
+      parameters:
+      - in: "body"
+        name: "user"
+        description: "Username and userpassword"
+        required: true
+        schema:
+          $ref: "#/definitions/User"
+      responses:
+        201:
+          description: "User created"
+      x-swagger-router-controller: "Users"
+    delete:
+      tags:
+      - "Users"
+      summary: "Deletes User"
+      operationId: "deleteUser"
+      parameters:
+      - name: "user_id"
+        in: "query"
+        description: "?user_id=testuser"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "User deleted"
+          schema:
+            $ref: "#/definitions/Dataresponse"
+        404:
+          description: "User not found"
+          schema:
+            $ref: "#/definitions/Error"
+        500:
+          description: "Internal error"
+      x-swagger-router-controller: "Users"
+    x-swagger-router-controller: "Users"
+  /auth:
+    get:
+      tags:
+      - "Authentifications"
+      summary: "verify user token"
+      operationId: "authUser"
+      parameters:
+      - in: "query"
+        name: "token"
+        description: "?token="
+        required: true
+        type: "string"
+      responses:
+        201:
+          description: "OK"
+          schema:
+            $ref: "#/definitions/Dataresponse"
+        403:
+          description: "Access denied"
+          schema:
+            $ref: "#/definitions/Error"
+        500:
+          description: "Internal error"
+      x-swagger-router-controller: "Authentifications"
+    x-swagger-router-controller: "Authentifications"
+  /configure:
+    get:
+      tags:
+      - "Configuration"
+      summary: "get Configuration"
+      operationId: "getConfig"
+      parameters:
+      - in: "query"
+        name: "user"
+        description: "?user="
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "OK"
+          schema:
+            $ref: "#/definitions/Dataresponse"
+        500:
+          description: "Internal error"
+    post:
+      tags:
+      - "Configuration"
+      summary: "Do basic configuration"
+      operationId: "configure"
+      parameters:
+      - in: "body"
+        name: "config"
+        description: "config data"
+        required: true
+        schema:
+          type: "object"
+          properties: {}
+      responses:
+        201:
+          description: "OK"
+          schema:
+            $ref: "#/definitions/Dataresponse"
+        500:
+          description: "Internal error"
+    x-swagger-router-controller: "Configuration"
+definitions:
+  Logs:
+    type: "object"
+    required:
+    - "data"
+    - "offset"
+    - "message"
+    properties:
+      data:
+        type: "array"
+        items:
+          type: "object"
+      message:
+        type: "string"
+      offset:
+        type: "number"
+  Dataresponse:
+    type: "object"
+    required:
+    - "data"
+    - "message"
+    properties:
+      message:
+        type: "string"
+      data:
+        type: "array"
+        items:
+          type: "string"
+  Schedule:
+    type: "object"
+    required:
+    - "descriptor"
+    properties:
+      label:
+        type: "string"
+        default: ""
+      descriptor:
+        type: "string"
+      command_id:
+        type: "string"
+      action:
+        type: "string"
+      options:
+        type: "object"
+        properties:
+          cronTime:
+            type: "string"
+          timeZone:
+            type: "string"
+      use_ftp:
+        type: "boolean"
+        default: false
+      ftp:
+        type: "object"
+        properties:
+          user:
+            type: "string"
+          password:
+            type: "string"
+          host:
+            type: "string"
+        default:
+          schema:
+          type: "object"
+          properties: {}
+  User:
+    type: "object"
+    properties:
+      username:
+        type: "string"
+  backup:
+    type: "object"
+    required:
+    - "descriptor"
+    - "database"
+    - "scheduler"
+    properties:
+      descriptor:
+        type: "string"
+      database:
+        type: "string"
+      scheduler:
+        type: "string"
+  recovery:
+    type: "object"
+    required:
+    - "database"
+    - "recovery_command"
+    - "archive"
+    - "ftp"
+    properties:
+      database:
+        type: "string"
+      recovery_command:
+        type: "string"
+      archive:
+        type: "string"
+      ftp:
+        type: "object"
+        properties: {}
+  Command:
+    type: "object"
+    required:
+    - "descriptor"
+    - "command"
+    - "parameters"
+    properties:
+      descriptor:
+        type: "string"
+      command:
+        type: "string"
+      parameters:
+        type: "object"
+        properties: {}
+  Error:
+    type: object
+    properties:
+      error:
+        type: integer
+      message:
+        type: string
